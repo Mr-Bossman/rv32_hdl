@@ -27,6 +27,8 @@ _start:
 	jal uart_putchar
 	li a0, 'K'
 	jal uart_putchar
+	li a0, '\n'
+	jal uart_putchar
 	/* zero-initialize all registers */
 
 	addi x1, zero, 0
@@ -69,12 +71,7 @@ _start:
 	.global n ## _ret; \
 	n ## _ret:
 
-	li ra, 1000
-	j lw
-end:
-	j end
 	#picorv32_timer_insn(zero, x1); \
-	TEST(addi)
 
 	TEST(lui)
 	TEST(auipc)

@@ -14,17 +14,18 @@ int main(int argc, char **argv, char **env) {
 	sim->rts = 1;
 	sim->eval();
 	sim->rts = 0;
-	for(int i = 0; i < 30000;i++){
+	while(!sim->halted){
 		//printf("microop_pc 0x%0x pc: 0x%0x\n",sim->odat,sim->oldpc);
 		sim->clk = 0;
 		sim->eval();
 		sim->clk = 1;
 		sim->eval();
 	}
+	puts("\n\n");
 	for(int i = 0; i < 32;i++){
 		printf("regs %d: 0x%0x\n",i,sim->rootp->soc_top__DOT__riscv_cpu__DOT__regfile[i]);
 	}
-		for(int i = 0; i < 32;i++){
+	for(int i = 0; i < 32;i++){
 		printf("mem 0x%02x: 0x%08lx\n",i*4,sim->rootp->soc_top__DOT__ram__DOT__mem[i]);
 	}
 	sim->final();

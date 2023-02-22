@@ -1,7 +1,7 @@
 module soc_top
 	#(parameter ADDR_WIDTH = 32,
 	  parameter DATA_WIDTH = 32)
-	(input clk, input rts,
+	(input clk, input rts,output halted,
 	output [31:0]odat,output [31:0] oldpc);
   
 	wire [ADDR_WIDTH-1:0] APB_paddr;
@@ -26,7 +26,7 @@ module soc_top
 	wire uart_ready;
 	wire uart_perr;
 
-	cpu 	    riscv_cpu(clk,APB_paddr,APB_pdata,APB_prdata,APB_psel,APB_penable,APB_pwrite,APB_pstb,APB_pready,APB_perr,rts,odat,oldpc);
+	cpu 	    riscv_cpu(clk,APB_paddr,APB_pdata,APB_prdata,APB_psel,APB_penable,APB_pwrite,APB_pstb,APB_pready,APB_perr,rts,halted,odat,oldpc);
 	APB 	      apb_bus(clk,APB_paddr,APB_pdata,APB_prdata,APB_psel,APB_penable,APB_pwrite,APB_pstb,APB_pready,APB_perr,sram_sel,sram_enable,sram_data,sram_ready,sram_perr,uart_sel,uart_enable,uart_data,uart_ready,uart_perr);
 
 	sram	    ram(clk,APB_paddr,APB_pdata,sram_data,sram_sel,sram_enable,APB_pwrite,APB_pstb,sram_ready,sram_perr);

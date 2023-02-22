@@ -6,7 +6,7 @@ LHU
 
 module cpu
 	#(parameter APB_paddr_WIDTH = 32,
-		parameter DATA_WIDTH = 32)
+	  parameter DATA_WIDTH = 32)
 	(input clk,
 	output reg [APB_paddr_WIDTH-1:0] APB_paddr,
 	output reg [DATA_WIDTH-1:0] APB_pdata,
@@ -17,12 +17,13 @@ module cpu
 	output [3:0] APB_pstb,
 	input APB_pready,
 	input APB_perr,
-	input rts,
+	input rts, output halted,
 	output [31:0]odat,output reg [31:0] oldpc);
 
 	reg [31:0] pc = 0;
 	reg [31:0] instruction;
 	reg halt = 0;
+	assign halted = halt;
 
 /* Regfile start*/
 	wire [4:0]ra0;
