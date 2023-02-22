@@ -24,8 +24,11 @@ run: ${PREFIX_NAME}
 	./${PREFIX_NAME}
 
 tests:
-	rm test.vh
-	$(MAKE) -C tests
+	rm test.vh || true
+	$(MAKE) -C tests CROSS_COMPILE=$(CROSS_COMPILE)
+
+run_tests: all tests
+	./${PREFIX_NAME}
 
 rv32asm: src/rv32.s src/rv32.lds
 	${CROSS_COMPILE}as src/rv32.s -o ${BUILD_DIR}/example.o

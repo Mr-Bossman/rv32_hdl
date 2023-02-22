@@ -38,4 +38,4 @@ tests.vh: $(OBJECTS) custom/start.S custom/linker.ld
 	${CROSS_COMPILE}gcc ${CLFAGS}  -Os -ffreestanding -nostdlib -Wl,-Bstatic,-T,custom/linker.ld $(BUILD_DIR)/start.o $(OBJECTS) -lgcc -o $(BUILD_DIR)/tests.elf
 	${CROSS_COMPILE}objcopy -O binary -O verilog --verilog-data-width=4 --reverse-bytes=4 -j .text ${BUILD_DIR}/tests.elf ../test.vh
 clean:
-	rm $(OBJECTS) $(BUILD_DIR)/start.o $(BUILD_DIR)/tests.elf ../test.vh
+	rm $(OBJECTS) $(BUILD_DIR)/start.o $(BUILD_DIR)/tests.elf ../test.vh || true

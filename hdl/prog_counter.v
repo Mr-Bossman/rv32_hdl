@@ -47,6 +47,8 @@ module prog_counter
 	wire load_insr = microop[3];
 	wire mem_access = microop[4];
 	wire alu_flags = microop[5];
+	wire load_pc = microop[6];
+
 	wire cmp_flag;
 /* flags end */
 initial begin
@@ -69,9 +71,9 @@ end
 /* verilator lint_on WIDTH */
 /* debug end */
 	wire ex_alu = (sub_op == 5 || op == 7'b0110011)?instruction[30]:0; // use extra ops for SRAI/SRA and non-imm(sub/add)
-	alu alu({ex_alu,sub_op},rd0,(instruction[5])?rd1:imm_i,alu_out,cmp_flag);
+	// use add imm for 1100111 AKA JALR
+	alu alu({ex_alu,sub_op},rd0,(instruction[5] || op == 7'b1100111)?rd1:imm_i,alu_out,cmp_flag);
 
-	wire [31:0] data_imm_i = {{21{odata[31]}}, odata[30:20]};
 	wire [31:0] imm_j = {{12{odata[31]}}, odata[19:12], odata[20], odata[30:21], 1'b0};
 	wire [31:0] imm_u = {odata[31:12], 12'b0};
 	always @(posedge clk or posedge rts) begin
@@ -96,13 +98,17 @@ end
 					7'b0?10011: begin // ALU
 						microop <= 4;
 					end
-					7'b110?111: begin // JAL/JALR
+					7'b1101111: begin // JAL
 						regfile[odata[11:7]] <= pc;
-						pc <= ((odata[3])?pc:rd0) + ((odata[3])?imm_j:data_imm_i) -4;
+						pc <= pc + imm_j - 4;
 						microop <= 0;
 					end
+					7'b1100111: begin // JALR
+						regfile[odata[11:7]] <= pc;
+						microop <= 8'h40;
+					end
 					7'b1100011: begin // BRANCH
-						microop <= 32;
+						microop <= 8'h20;
 					end
 					default:microop <= 0;
 
@@ -139,6 +145,7 @@ end
 			end
 			if(store_alu) regfile[wa] <= alu_out;
 			if(alu_flags && cmp_flag) pc <= imm_b + pc - 4;
+			if(load_pc) pc <= alu_out;
 		end
 	end
 
