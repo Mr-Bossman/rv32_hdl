@@ -123,5 +123,6 @@ _theend:
 
 # void uart_putchar(char c)
 uart_putchar:
-	sw a0, 0x400(x0)
+	la t2, 0x1000000
+	sw a0, 0(t2)
 	ret

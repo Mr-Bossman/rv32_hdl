@@ -157,7 +157,7 @@ end
 					2'b10: dsize <= 4'b1111;
 					default: dsize <= 4'b1111;
 				endcase
-				APB_paddr <= (op == 7'b0100011)?imm_s:imm_i + rd0;
+				APB_paddr <= ((op == 7'b0100011)?imm_s:imm_i) + rd0;
 				APB_pdata <= rd1;
 				/* TODO: cast 00 and 01 as ints if sub_op[2] is 0 */
 				if(APB_penable && APB_psel && APB_pready && (op == 7'b0000011))

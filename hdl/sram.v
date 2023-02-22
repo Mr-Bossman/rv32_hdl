@@ -45,7 +45,7 @@ always_comb begin: read_process
 end
 
 assign pready = ready;
-assign perr = (paddr[1] | paddr[0]) & pwrite;
+assign perr = 0;
 always @(posedge pclk) begin: write_process
 	if(psel && penable  && !ready) begin
 		if (pwrite) begin

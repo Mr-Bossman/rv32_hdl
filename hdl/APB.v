@@ -31,7 +31,7 @@ module APB
 	assign perr = sram_perr | uart_perr;
 
 	always_comb begin
-		if(paddr != 'h0x400) begin
+		if(paddr != 'h0x1000000) begin
 			uart_sel = 0;
 			uart_enable = 0;
 			sram_sel = psel;
