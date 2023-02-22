@@ -26,9 +26,8 @@ module alu
 				compare = sub_zf;
 			2'b10:
 				compare = sub_sf;
-			//TODO: unsigned cmp \/
 			2'b11:
-				compare = sub_sf;
+				compare = sub_cf;
 			//TODO: bad instruction
 			2'b01:
 				compare = 0;
