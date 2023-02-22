@@ -107,8 +107,8 @@ end
 				if(odata == 32'b0) halt <= 1;
 				casez (odata[6:0])
 					7'b0?00011: begin // LOAD/STORE
-						microop_pc <= 8;
-						microop <= microop_prog[8];
+						microop_pc <= 4;
+						microop <= microop_prog[4];
 					end
 					7'b0?10111: begin //LUI/AUIPC
 						// TODO: check if pc is +4 or not
