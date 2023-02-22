@@ -32,7 +32,7 @@ always_comb begin
 end
 
 assign pready = ready;
-assign perr = 0;
+assign perr = paddr[1] | paddr[0];
 always @(posedge pclk) begin
 	if(psel && penable  && !ready) begin
 		if (pwrite) begin

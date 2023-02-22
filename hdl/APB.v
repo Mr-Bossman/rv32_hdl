@@ -19,13 +19,13 @@ module APB
 	reg sram_enable;
 	reg [DATA_WIDTH-1:0]sram_data;
 	reg sram_ready;
-	reg sram_perr;
+	wire sram_perr;
 
 	reg uart_sel;
 	reg uart_enable;
 	reg [DATA_WIDTH-1:0]uart_data;
 	reg uart_ready;
-	reg uart_perr;
+	wire uart_perr;
 
 	assign perr = sram_perr | uart_perr;
 

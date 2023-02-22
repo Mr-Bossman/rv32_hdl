@@ -16,10 +16,12 @@ module uart
 		output reg ready,
 		output perr);
 assign prdata = 0;
+reg rderr = 0;
+assign perr = paddr[1] | paddr[0] | rderr;
 always @(posedge pclk) begin
 	if(psel && penable && !ready) begin
 		if (pwrite) $display("%c",pdata[7:0]);
-    		else perr <= 1;
+		else rderr <= 1;
 		ready <= 1;
 	end
 	else ready <= 0;
