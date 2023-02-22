@@ -6,4 +6,5 @@ SECTIONS
 	.text : ALIGN(16) {
 		*(.asm)
 	}
+	/DISCARD/ : { *(.riscv.attributes) }
 }

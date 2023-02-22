@@ -92,7 +92,7 @@ end
 					end
 					7'b0?10111: begin //LUI/AUIPC
 						// TODO: check if pc is +4 or not
-						regfile[odata[11:7]] <= imm_u + ((odata[5])?0:pc);
+						regfile[odata[11:7]] <= imm_u + ((odata[5])?0:pc-4);
 						microop <= 0;
 					end
 					7'b0?10011: begin // ALU

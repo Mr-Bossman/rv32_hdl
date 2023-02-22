@@ -3,7 +3,7 @@
 module sram
 	#(parameter ADDR_WIDTH = 32,
 		parameter DATA_WIDTH = 32,
-		parameter RAM_SIZE = 100000)
+		parameter RAM_SIZE = 1000000)
 	(
 		input pclk,
 		input [ADDR_WIDTH-1:0] paddr,
