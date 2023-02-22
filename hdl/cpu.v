@@ -3,7 +3,7 @@
 LBU
 LHU
 */
-module prog_counter
+module cpu
 	(input clk,
 	input rts,
 	output [31:0]odat,output reg [31:0] oldpc);
@@ -37,9 +37,12 @@ module prog_counter
 	wire APB_en = microop[1];
 	wire APB_wr = (op == 7'b0100011);
 	reg [3:0] dsize = 4'b1111;
+	/* APB spec dissalows read Byte mask */
+	wire [3:0] pstb = (APB_wr)?dsize:4'b1111;
 
 	reg [31:0] data;
-	wire [31:0] odata;
+	wire [31:0]rd_data;
+	reg [31:0] odata;
 	reg [31:0] addr;
 /* AHB end */
 /* flags start */
@@ -63,7 +66,17 @@ end
 	wire [31:0] imm_s = {{21{instruction[31]}}, instruction[30:25], instruction[11:7]};
 	wire [31:0] imm_i = {{21{instruction[31]}}, instruction[30:20]};
 	wire [31:0] imm_b = {{20{instruction[31]}}, instruction[7], instruction[30:25], instruction[11:8], 1'b0};
-	APB apb_bus(clk,addr,data,odata,APB_sel,APB_en,APB_wr,dsize,APB_ready,APB_err);
+	APB apb_bus(clk,addr,data,rd_data,APB_sel,APB_en,APB_wr,pstb,APB_ready,APB_err);
+
+/* READ byte mask start */
+	integer i;
+	always_comb begin
+		for( i = 0; i <= (32/8)-1;i = i + 1) begin
+			if(dsize[i]) odata[8*i+:8] = rd_data[8*i+:8];
+			else odata[8*i+:8] = 8'b0;
+		end
+	end
+/* READ byte mask end */
 
 /* debug start */
 /* verilator lint_off WIDTH */

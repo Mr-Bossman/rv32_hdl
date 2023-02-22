@@ -29,7 +29,7 @@ module APB
 
 	assign perr = sram_perr | uart_perr;
 
-  	sram ram(pclk,paddr,pdata,sram_data,sram_sel,sram_enable,pwrite,pstb,sram_ready,sram_perr);
+  sram ram(pclk,paddr,pdata,sram_data,sram_sel,sram_enable,pwrite,pstb,sram_ready,sram_perr);
 	uart console(pclk,paddr,pdata,uart_data,uart_sel,uart_enable,pwrite,pstb,uart_ready,uart_perr);
 
 	always_comb begin

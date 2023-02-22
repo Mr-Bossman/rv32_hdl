@@ -22,10 +22,10 @@ int main(int argc, char **argv, char **env) {
 		sim->eval();
 	}
 	for(int i = 0; i < 32;i++){
-		printf("regs %d: 0x%0x\n",i,sim->rootp->prog_counter__DOT__regfile[i]);
+		printf("regs %d: 0x%0x\n",i,sim->rootp->cpu__DOT__regfile[i]);
 	}
 		for(int i = 0; i < 32;i++){
-		printf("mem 0x%02x: 0x%08lx\n",i*4,sim->rootp->prog_counter__DOT__apb_bus__DOT__ram__DOT__mem[i]);
+		printf("mem 0x%02x: 0x%08lx\n",i*4,sim->rootp->cpu__DOT__apb_bus__DOT__ram__DOT__mem[i]);
 	}
 	sim->final();
 	delete sim;

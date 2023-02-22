@@ -5,7 +5,7 @@ CXX = g++
 CPPFLAGS = -DVPREFIX=${PREFIX_NAME} -Og
 LDFLAGS =
 CPP_SOURCES = src/test.cpp
-V_SOURCES = hdl/sram.v hdl/prog_counter.v hdl/alu.v hdl/APB.v hdl/uart.v
+V_SOURCES = hdl/sram.v hdl/cpu.v hdl/alu.v hdl/APB.v hdl/uart.v hdl/soc_top.v
 INCV_SOURCES = 
 INCLUDES = $(addprefix --include ${PREFIX_NAME}_,$(notdir $(INCV_SOURCES:.v=.h))) -include ${PREFIX_NAME}.h -include ${PREFIX_NAME}___024root.h
 CPPFLAGS += ${INCLUDES}
@@ -16,7 +16,7 @@ CROSS_COMPILE=~/linux/buildroot/output/host/bin/riscv32-linux-
 all: ${PREFIX_NAME}
 
 ${PREFIX_NAME} : ${V_SOURCES} ${CPP_SOURCES}
-	verilator -Wall --Mdir ${BUILD_DIR} -cc ${V_SOURCES} -prefix ${PREFIX_NAME} -CFLAGS "${CPPFLAGS}" ${CPP_SOURCES} --exe --top-module prog_counter
+	verilator -Wall --Mdir ${BUILD_DIR} -cc ${V_SOURCES} -prefix ${PREFIX_NAME} -CFLAGS "${CPPFLAGS}" ${CPP_SOURCES} --exe --top-module cpu
 	$(MAKE) -C ${BUILD_DIR} -f ${PREFIX_NAME}.mk ${PREFIX_NAME}
 	cp ${BUILD_DIR}/${PREFIX_NAME} .
 
