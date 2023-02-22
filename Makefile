@@ -16,7 +16,7 @@ CROSS_COMPILE=~/linux/buildroot/output/host/bin/riscv32-linux-
 all: ${PREFIX_NAME}
 
 ${PREFIX_NAME} : ${V_SOURCES} ${CPP_SOURCES}
-	verilator -Wall --Mdir ${BUILD_DIR} -cc ${V_SOURCES} -prefix ${PREFIX_NAME} -CFLAGS "${CPPFLAGS}" ${CPP_SOURCES} --exe --top-module cpu
+	verilator -Wall --Mdir ${BUILD_DIR} -cc ${V_SOURCES} -prefix ${PREFIX_NAME} -CFLAGS "${CPPFLAGS}" ${CPP_SOURCES} --exe --top-module soc_top
 	$(MAKE) -C ${BUILD_DIR} -f ${PREFIX_NAME}.mk ${PREFIX_NAME}
 	cp ${BUILD_DIR}/${PREFIX_NAME} .
 

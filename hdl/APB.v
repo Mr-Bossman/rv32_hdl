@@ -14,23 +14,21 @@ module APB
 		input pwrite,
 		input [3:0] pstb,
 		output reg pready,
-		output perr);
-	reg sram_sel;
-	reg sram_enable;
-	reg [DATA_WIDTH-1:0]sram_data;
-	reg sram_ready;
-	wire sram_perr;
+		output perr,
 
-	reg uart_sel;
-	reg uart_enable;
-	reg [DATA_WIDTH-1:0]uart_data;
-	reg uart_ready;
-	wire uart_perr;
+		output reg sram_sel,
+		output reg sram_enable,
+		input [DATA_WIDTH-1:0]sram_data,
+		input sram_ready,
+		input sram_perr,
+
+		output reg uart_sel,
+		output reg uart_enable,
+		input [DATA_WIDTH-1:0]uart_data,
+		input uart_ready,
+		input uart_perr);
 
 	assign perr = sram_perr | uart_perr;
-
-  sram ram(pclk,paddr,pdata,sram_data,sram_sel,sram_enable,pwrite,pstb,sram_ready,sram_perr);
-	uart console(pclk,paddr,pdata,uart_data,uart_sel,uart_enable,pwrite,pstb,uart_ready,uart_perr);
 
 	always_comb begin
 		if(paddr != 'h0x400) begin

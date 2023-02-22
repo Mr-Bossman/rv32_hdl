@@ -3,8 +3,20 @@
 LBU
 LHU
 */
+
 module cpu
+	#(parameter APB_paddr_WIDTH = 32,
+		parameter DATA_WIDTH = 32)
 	(input clk,
+	output reg [APB_paddr_WIDTH-1:0] APB_paddr,
+	output reg [DATA_WIDTH-1:0] APB_pdata,
+	input [DATA_WIDTH-1:0]  APB_prdata,
+	output APB_psel,
+	output APB_penable,
+	output APB_pwrite,
+	output [3:0] APB_pstb,
+	input APB_pready,
+	input APB_perr,
 	input rts,
 	output [31:0]odat,output reg [31:0] oldpc);
 
@@ -31,19 +43,14 @@ module cpu
 	wire [31:0] alu_out;
 
 /* AHB start */
-	wire APB_ready;
-	wire APB_err;
-	wire APB_sel = microop[0];
-	wire APB_en = microop[1];
-	wire APB_wr = (op == 7'b0100011);
+	assign APB_psel = microop[0];
+	assign APB_penable = microop[1];
+	assign APB_pwrite = (op == 7'b0100011);
 	reg [3:0] dsize = 4'b1111;
 	/* APB spec dissalows read Byte mask */
-	wire [3:0] pstb = (APB_wr)?dsize:4'b1111;
+	assign APB_pstb = (APB_pwrite)?dsize:4'b1111;
 
-	reg [31:0] data;
-	wire [31:0]rd_data;
 	reg [31:0] odata;
-	reg [31:0] addr;
 /* AHB end */
 /* flags start */
 	wire store_alu = microop[2];
@@ -66,13 +73,12 @@ end
 	wire [31:0] imm_s = {{21{instruction[31]}}, instruction[30:25], instruction[11:7]};
 	wire [31:0] imm_i = {{21{instruction[31]}}, instruction[30:20]};
 	wire [31:0] imm_b = {{20{instruction[31]}}, instruction[7], instruction[30:25], instruction[11:8], 1'b0};
-	APB apb_bus(clk,addr,data,rd_data,APB_sel,APB_en,APB_wr,pstb,APB_ready,APB_err);
 
 /* READ byte mask start */
 	integer i;
 	always_comb begin
 		for( i = 0; i <= (32/8)-1;i = i + 1) begin
-			if(dsize[i]) odata[8*i+:8] = rd_data[8*i+:8];
+			if(dsize[i]) odata[8*i+:8] = APB_prdata[8*i+:8];
 			else odata[8*i+:8] = 8'b0;
 		end
 	end
@@ -94,7 +100,7 @@ end
 			pc <= 0;
 		else if(!halt) begin
 			// TODO: do trap
-			if(APB_err) halt <= 1;
+			if(APB_perr) halt <= 1;
 			if(load_insr) begin
 				instruction <= odata;
 				if(odata == 32'b0) halt <= 1;
@@ -128,15 +134,15 @@ end
 
 				endcase
 			end
-			// halt till APB_ready is ready
-			else if(!(APB_en && APB_sel && !APB_ready)) begin
+			// halt till APB_pready is ready
+			else if(!(APB_penable && APB_psel && !APB_pready)) begin
 				if(microop != 8'b0) begin
 					microop_pc <= microop_pc + 1;
 					microop <= microop_prog[microop_pc];
 				end else begin
 					instruction <= 0;
 					microop_pc <= 1;
-					addr <= pc;
+					APB_paddr <= pc;
 					pc <= pc + 4;
 					dsize <= 4'b1111;
 					microop <= microop_prog[0];
@@ -150,10 +156,10 @@ end
 					2'b10: dsize <= 4'b1111;
 					default: dsize <= 4'b1111;
 				endcase
-				addr <= (op == 7'b0100011)?imm_s:imm_i + rd0;
-				data <= rd1;
+				APB_paddr <= (op == 7'b0100011)?imm_s:imm_i + rd0;
+				APB_pdata <= rd1;
 				/* TODO: cast 00 and 01 as ints if sub_op[2] is 0 */
-				if(APB_en && APB_sel && APB_ready && (op == 7'b0000011))
+				if(APB_penable && APB_psel && APB_pready && (op == 7'b0000011))
 					regfile[wa] <= odata;
 			end
 			if(store_alu) regfile[wa] <= alu_out;
