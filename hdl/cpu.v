@@ -92,7 +92,7 @@ end
 /* debug end */
 	wire ex_alu = (sub_op == 5 || op == 7'b0110011)?instruction[30]:0; // use extra ops for SRAI/SRA and non-imm(sub/add)
 	// use add imm for 1100111 AKA JALR
-	alu alu({ex_alu,sub_op},rd0,(instruction[5] || op == 7'b1100111)?rd1:imm_i,alu_out,cmp_flag);
+	alu alu({ex_alu,sub_op},rd0,(instruction[5] && op != 7'b1100111)?rd1:imm_i,alu_out,cmp_flag);
 
 	wire [31:0] imm_j = {{12{odata[31]}}, odata[19:12], odata[20], odata[30:21], 1'b0};
 	wire [31:0] imm_u = {odata[31:12], 12'b0};
@@ -124,7 +124,6 @@ end
 						microop <= 0;
 					end
 					7'b1100111: begin // JALR
-						regfile[odata[11:7]] <= pc;
 						microop <= 8'h40;
 					end
 					7'b1100011: begin // BRANCH
@@ -165,7 +164,10 @@ end
 			end
 			if(store_alu) regfile[wa] <= alu_out;
 			if(alu_flags && cmp_flag) pc <= imm_b + pc - 4;
-			if(load_pc) pc <= alu_out;
+			if(load_pc) begin
+				regfile[wa] <= pc;
+				pc <= alu_out;
+			end
 		end
 	end
 

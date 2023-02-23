@@ -3,7 +3,7 @@ module soc_top
 	  parameter DATA_WIDTH = 32)
 	(input clk, input rts,output halted,
 	output [31:0]odat,output [31:0] oldpc);
-  
+
 	wire [ADDR_WIDTH-1:0] APB_paddr;
 	wire [DATA_WIDTH-1:0] APB_pdata;
 	wire [DATA_WIDTH-1:0] APB_prdata;
