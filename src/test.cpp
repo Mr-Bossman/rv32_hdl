@@ -5,22 +5,13 @@
 #define PREFIX(x) CAT(SUFF(VPREFIX),x)
 
 #include <iostream>
+#include <signal.h>
 
-int main(int argc, char **argv, char **env) {
-	Verilated::commandArgs(argc, argv);
-	VPREFIX* sim = new VPREFIX;
+static uint64_t instruction_count = 0;
+static uint64_t clock_count = 0;
+static VPREFIX* sim = NULL;
 
-
-	sim->rts = 1;
-	sim->eval();
-	sim->rts = 0;
-	while(!sim->halted){
-		//printf("microop_pc 0x%0x pc: 0x%0x\n",sim->odat,sim->oldpc);
-		sim->clk = 0;
-		sim->eval();
-		sim->clk = 1;
-		sim->eval();
-	}
+static void exit_now(int signo){
 	puts("\n\n");
 	for(int i = 0; i < 32;i++){
 		printf("regs %d: 0x%0x\n",i,sim->rootp->soc_top__DOT__riscv_cpu__DOT__regfile[i]);
@@ -30,5 +21,32 @@ int main(int argc, char **argv, char **env) {
 	}
 	sim->final();
 	delete sim;
+	printf("IPC: %lf instructions/clock\nCPI: %lf clock/instructions\n",(double)instruction_count/clock_count,(double)clock_count/instruction_count);
+	exit(signo);
+}
+
+int main(int argc, char **argv, char **env) {
+	signal(SIGINT, exit_now);
+	Verilated::commandArgs(argc, argv);
+	sim = new VPREFIX;
+
+	sim->rts = 1;
+	sim->eval();
+	sim->rts = 0;
+	uint32_t oldpc = sim->oldpc;
+	while(!sim->halted){
+		//printf("microop_pc 0x%0x pc: 0x%0x\n",sim->odat,sim->oldpc);
+		sim->clk = 0;
+		sim->eval();
+		sim->clk = 1;
+		sim->eval();
+		if(sim->oldpc != oldpc){
+			oldpc = sim->oldpc;
+			instruction_count++;
+			//printf("IPC: %lf instructions/clock,\tCPI: %lf clock/instructions\n",(double)instruction_count/clock_count,(double)clock_count/instruction_count);
+		}
+		clock_count++;
+	}
+	exit_now(0);
 	return 0;
 }
