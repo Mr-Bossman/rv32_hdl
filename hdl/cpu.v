@@ -159,8 +159,16 @@ end
 				APB_paddr <= ((op == 7'b0100011)?imm_s:imm_i) + rd0;
 				APB_pdata <= rd1;
 				/* TODO: cast 00 and 01 as ints if sub_op[2] is 0 */
-				if(APB_penable && APB_psel && APB_pready && (op == 7'b0000011))
-					regfile[wa] <= odata;
+				if(APB_penable && APB_psel && APB_pready && (op == 7'b0000011)) begin
+					if(sub_op[2] == 1'b0) begin
+						unique case (sub_op[1:0])
+							2'b00: regfile[wa] <= {{24{odata[7]}},odata[7:0]};
+							2'b01: regfile[wa] <= {{16{odata[15]}},odata[15:0]};
+							2'b10: regfile[wa] <= odata;
+							default: regfile[wa] <= odata;
+						endcase
+					end else	regfile[wa] <= odata;
+				end
 			end
 			if(store_alu) regfile[wa] <= alu_out;
 			if(alu_flags && cmp_flag) pc <= imm_b + pc - 4;
