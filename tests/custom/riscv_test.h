@@ -79,6 +79,10 @@ TEST_FUNC_NAME:				\
 	jal uart_putchar;		\
 	addi a0, zero, 'r';		\
 	jal uart_putchar;		\
+	addi a0, zero, ':';		\
+	jal uart_putchar;		\
+	addi a0, TESTNUM,'0'; \
+	jal uart_putchar;		\
 	addi a0, zero, '\r';	\
 	jal uart_putchar;		\
 	addi a0, zero, '\n';	\

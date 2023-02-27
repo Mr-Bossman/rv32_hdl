@@ -95,6 +95,8 @@ _start:
 	TEST(sh)
 	TEST(sw)
 
+	TEST(ma_data)
+
 	TEST(addi)
 	TEST(slti) // also tests sltiu
 	TEST(xori)

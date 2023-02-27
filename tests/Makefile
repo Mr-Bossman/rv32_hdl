@@ -14,6 +14,7 @@ rv32ui_sc_tests = \
 	lb lbu lh lhu lw \
 	lui \
 	or ori \
+	ma_data \
 	sb sh sw \
 	sll slli \
 	slt slti sltiu \
