@@ -27,7 +27,6 @@ OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(S_SOURCES:.S=.o)))
 
 vpath %.S $(sort $(dir $(S_SOURCES)))
 
-
 all: tests.vh
 
 $(BUILD_DIR)/%.o: %.S
@@ -36,6 +35,7 @@ $(BUILD_DIR)/%.o: %.S
 tests.vh: $(OBJECTS) custom/start.S custom/linker.ld
 	${CROSS_COMPILE}gcc ${CLFAGS}  -c  custom/start.S -o $(BUILD_DIR)/start.o
 	${CROSS_COMPILE}gcc ${CLFAGS}  -Os -ffreestanding -nostdlib -Wl,-Bstatic,-T,custom/linker.ld $(BUILD_DIR)/start.o $(OBJECTS) -lgcc -o $(BUILD_DIR)/tests.elf
-	${CROSS_COMPILE}objcopy -O binary -O verilog --verilog-data-width=4 --reverse-bytes=4 -j .text ${BUILD_DIR}/tests.elf ../test.vh
+	${CROSS_COMPILE}objcopy -O binary -O verilog --gap-fill 0 --verilog-data-width=4 --reverse-bytes=4 -j .text -j .data ${BUILD_DIR}/tests.elf ../test.vh
+	sed -i s/@.*//g ../test.vh
 clean:
 	rm $(OBJECTS) $(BUILD_DIR)/start.o $(BUILD_DIR)/tests.elf ../test.vh || true

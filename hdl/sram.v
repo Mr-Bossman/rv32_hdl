@@ -25,8 +25,6 @@ initial begin
 	$readmemh("test.vh", mem);
 end
 always_comb begin: read_process
-
-
 	unique case(addr[1:0])
 		2'b00: prdata = mem[{2'b0, addr[ADDR_WIDTH-1:2]}];
 		2'b01: begin
@@ -49,9 +47,30 @@ assign perr = 0;
 always @(posedge pclk) begin: write_process
 	if(psel && penable  && !ready) begin
 		if (pwrite) begin
-			for( i = 0; i <= (ADDR_WIDTH/8)-1;i = i + 1) begin
-				if(pstb[i])
-					mem[{2'b0,paddr[ADDR_WIDTH-1:2]}][8*i+:8] <= pdata[8*i+:8];
+			for( i = 0; i < (ADDR_WIDTH/8);i = i + 1) begin
+				if(pstb[i]) begin
+					unique case(paddr[1:0])
+						2'b00: mem[{2'b0,paddr[ADDR_WIDTH-1:2]}][8*i+:8] <= pdata[8*i+:8];
+						2'b01: begin
+							if(i < 3)
+								mem[{2'b0,paddr[ADDR_WIDTH-1:2]}][8*(i+1)+:8] <= pdata[8*i+:8];
+							else
+								mem[{2'b0,paddr[ADDR_WIDTH-1:2]}+1][8*(i-3)+:8] <= pdata[8*i+:8];
+						end
+						2'b10: begin
+							if(i < 2)
+								mem[{2'b0,paddr[ADDR_WIDTH-1:2]}][8*(i+2)+:8] <= pdata[8*i+:8];
+							else
+								mem[{2'b0,paddr[ADDR_WIDTH-1:2]}+1][8*(i-2)+:8] <= pdata[8*i+:8];
+						end
+						2'b11: begin
+							if(i < 1)
+								mem[{2'b0,paddr[ADDR_WIDTH-1:2]}][8*(i+3)+:8] <= pdata[8*i+:8];
+							else
+								mem[{2'b0,paddr[ADDR_WIDTH-1:2]}+1][8*(i-1)+:8] <= pdata[8*i+:8];
+						end
+					endcase
+				end
 			end
 		end else addr <= paddr;
 		ready <= 1;
