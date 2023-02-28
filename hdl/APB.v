@@ -26,29 +26,51 @@ module APB
 		output reg uart_enable,
 		input [DATA_WIDTH-1:0]uart_data,
 		input uart_ready,
-		input uart_perr);
+		input uart_perr,
+
+		output reg system_sel,
+		output reg system_enable,
+		input [DATA_WIDTH-1:0]system_data,
+		input system_ready,
+		input system_perr);
 	reg access_fault;
-	assign perr = sram_perr | uart_perr | access_fault;
+	assign perr = sram_perr | uart_perr | system_perr | access_fault;
 
 	always_comb begin
 		if(paddr >= 'h80000000) begin
 			access_fault = 0;
 			uart_sel = 0;
 			uart_enable = 0;
+			system_sel = 0;
+			system_enable = 0;
 			sram_sel = psel;
 			sram_enable = penable;
 			pready = sram_ready;
 			prdata = sram_data;
 		end else if (paddr == 'h1000000) begin
 			access_fault = 0;
+			sram_sel = 0;
+			sram_enable = 0;
+			system_sel = 0;
+			system_enable = 0;
 			uart_sel = psel;
 			uart_enable = penable;
 			pready = uart_ready;
 			prdata = uart_data;
+		end else if (paddr <= 'h400)begin
+			access_fault = 0;
+			uart_sel = 0;
+			uart_enable = 0;
 			sram_sel = 0;
 			sram_enable = 0;
+			system_sel = psel;
+			system_enable = penable;
+			pready = system_ready;
+			prdata = system_data;
 		end else begin
 			access_fault = 1;
+			system_sel = 0;
+			system_enable = 0;
 			uart_sel = 0;
 			uart_enable = 0;
 			sram_sel = 0;

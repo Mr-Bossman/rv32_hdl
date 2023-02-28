@@ -177,7 +177,7 @@ end
 				end
 			end
 			if(sys_load) begin
-				APB_paddr <= 0;
+				APB_paddr <= {29'b0,write_flag,2'b0};
 				APB_pdata <= pc;
 				if(APB_penable && APB_psel && APB_pready && !write_flag) begin
 					pc <= odata;
