@@ -29,7 +29,8 @@ int main(int argc, char **argv, char **env) {
 	signal(SIGINT, exit_now);
 	Verilated::commandArgs(argc, argv);
 	sim = new VPREFIX;
-
+	sim->rts = 0;
+	sim->eval();
 	sim->rts = 1;
 	sim->eval();
 	sim->rts = 0;

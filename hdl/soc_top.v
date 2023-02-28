@@ -29,6 +29,6 @@ module soc_top
 	cpu 	    riscv_cpu(clk,APB_paddr,APB_pdata,APB_prdata,APB_psel,APB_penable,APB_pwrite,APB_pstb,APB_pready,APB_perr,rts,halted,odat,oldpc);
 	APB 	      apb_bus(clk,APB_paddr,APB_pdata,APB_prdata,APB_psel,APB_penable,APB_pwrite,APB_pstb,APB_pready,APB_perr,sram_sel,sram_enable,sram_data,sram_ready,sram_perr,uart_sel,uart_enable,uart_data,uart_ready,uart_perr);
 
-	sram	    ram(clk,APB_paddr,APB_pdata,sram_data,sram_sel,sram_enable,APB_pwrite,APB_pstb,sram_ready,sram_perr);
+	sram	    ram(clk,{1'b0,APB_paddr[30:0]},APB_pdata,sram_data,sram_sel,sram_enable,APB_pwrite,APB_pstb,sram_ready,sram_perr);
 	uart	console(clk,APB_paddr,APB_pdata,uart_data,uart_sel,uart_enable,APB_pwrite,APB_pstb,uart_ready,uart_perr);
 endmodule

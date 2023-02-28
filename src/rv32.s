@@ -3,8 +3,6 @@
 
 .align 4
 start:
-	lb x4, (x0)
-	sw x4, 0x60(x0)
 	la x10, 0x1000000
 	la x6, .texts
 1:

@@ -1,9 +1,3 @@
-
-/* TODO
-LBU
-LHU
-*/
-
 module cpu
 	#(parameter APB_paddr_WIDTH = 32,
 	  parameter DATA_WIDTH = 32)
@@ -19,8 +13,7 @@ module cpu
 	input APB_perr,
 	input rts, output halted,
 	output [31:0]odat,output reg [31:0] oldpc);
-
-	reg [31:0] pc = 0;
+	reg [31:0] pc;
 	reg [31:0] instruction;
 	reg halt = 0;
 	assign halted = halt;
@@ -46,7 +39,7 @@ module cpu
 /* AHB start */
 	assign APB_psel = microop[0];
 	assign APB_penable = microop[1];
-	assign APB_pwrite = (op == 7'b0100011);
+	assign APB_pwrite = (op == 7'b0100011) | write_flag;
 	reg [3:0] dsize = 4'b1111;
 	/* APB spec dissalows read Byte mask */
 	assign APB_pstb = (APB_pwrite)?dsize:4'b1111;
@@ -59,7 +52,8 @@ module cpu
 	wire mem_access = microop[4];
 	wire alu_flags = microop[5];
 	wire load_pc = microop[6];
-
+	wire sys_load = microop[7];
+	reg write_flag = 0;
 	wire cmp_flag;
 /* flags end */
 initial begin
@@ -97,9 +91,12 @@ end
 	wire [31:0] imm_j = {{12{odata[31]}}, odata[19:12], odata[20], odata[30:21], 1'b0};
 	wire [31:0] imm_u = {odata[31:12], 12'b0};
 	always @(posedge clk or posedge rts) begin
-		if(rts)
-			pc <= 0;
-		else if(!halt) begin
+		if(rts) begin
+			pc <= 'h80000000;
+			APB_paddr <= 'h80000000;
+			microop <= 0;
+			halt <= 0;
+		end else if(!halt) begin
 			// TODO: do trap
 			if(APB_perr) halt <= 1;
 			if(load_insr) begin
@@ -129,6 +126,13 @@ end
 					7'b1100011: begin // BRANCH
 						microop <= 8'h20;
 					end
+					7'b1110011: begin // SYSTEM
+						if(odata[20] == 1) begin
+							write_flag <= 1;
+						end
+						microop_pc <= 7;
+						microop <= microop_prog[7];
+					end
 					default:microop <= 0;
 
 
@@ -140,6 +144,7 @@ end
 					microop_pc <= microop_pc + 1;
 					microop <= microop_prog[microop_pc];
 				end else begin
+					write_flag <= 0;
 					instruction <= 0;
 					microop_pc <= 1;
 					APB_paddr <= pc;
@@ -167,7 +172,15 @@ end
 							2'b10: regfile[wa] <= odata;
 							default: regfile[wa] <= odata;
 						endcase
-					end else	regfile[wa] <= odata;
+					end else
+						regfile[wa] <= odata;
+				end
+			end
+			if(sys_load) begin
+				APB_paddr <= 0;
+				APB_pdata <= pc;
+				if(APB_penable && APB_psel && APB_pready && !write_flag) begin
+					pc <= odata;
 				end
 			end
 			if(store_alu) regfile[wa] <= alu_out;

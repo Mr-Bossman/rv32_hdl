@@ -34,6 +34,7 @@ rv32asm: src/rv32.s src/rv32.lds
 	${CROSS_COMPILE}as -mlittle-endian src/rv32.s -o ${BUILD_DIR}/example.o
 	${CROSS_COMPILE}ld -melf32lriscv --gc-sections -T src/rv32.lds ${BUILD_DIR}/example.o -o ${BUILD_DIR}/example.elf
 	${CROSS_COMPILE}objcopy -O verilog --verilog-data-width=4 -j .text ${BUILD_DIR}/example.elf test.vh
+	sed -i s/@.*//g test.vh
 
 clean_exe:
 	rm -rf ${PREFIX_NAME}
