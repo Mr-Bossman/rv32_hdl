@@ -6,7 +6,6 @@ start:
 	la x10, 0x1000000
 	la x5, call
 	sw x5,0(x0)
-	ebreak
 	ecall
 halt:
 	j halt
@@ -20,11 +19,13 @@ halt:
 	.word 0x00;
 
 
-call:
-	lw x5, 4(x0)
-	addi x5,x5,8
-	sw x5,0(x0)
+back:
 	ecall
+call:
+	lw x5, 0(x0)
+	addi x5,x5,4
+	sw x5,0(x0)
+	j back
 
 .texts:
 	.ascii "test\n";

@@ -15,6 +15,7 @@ module cpu
 	output [31:0]odat,output reg [31:0] oldpc);
 	reg [31:0] pc;
 	reg [31:0] instruction;
+	reg [31:0] systmp;
 	reg halt = 0;
 	assign halted = halt;
 
@@ -31,8 +32,8 @@ module cpu
 /* Regfile end*/
 
 	reg [3:0] microop_pc = 0;
-	reg [7:0] microop_prog[0:15];
-	reg [7:0] microop;
+	reg [8:0] microop_prog[0:15];
+	reg [8:0] microop;
 
 	wire [31:0] alu_out;
 
@@ -53,7 +54,7 @@ module cpu
 	wire alu_flags = microop[5];
 	wire load_pc = microop[6];
 	wire sys_load = microop[7];
-	reg write_flag = 0;
+	wire write_flag = microop[8];
 	wire cmp_flag;
 /* flags end */
 initial begin
@@ -121,30 +122,29 @@ end
 						microop <= 0;
 					end
 					7'b1100111: begin // JALR
-						microop <= 8'h40;
+						microop <= 9'h040;
 					end
 					7'b1100011: begin // BRANCH
-						microop <= 8'h20;
+						microop <= 9'h020;
 					end
 					7'b1110011: begin // SYSTEM
-						if(odata[20] == 1) begin
-							write_flag <= 1;
-						end
 						microop_pc <= 7;
 						microop <= microop_prog[7];
 					end
-					default:microop <= 0;
+					default: begin // SYSTEM
+						microop_pc <= 7;
+						microop <= microop_prog[7];
+					end
 
 
 				endcase
 			end
 			// halt till APB_pready is ready
 			else if(!(APB_penable && APB_psel && !APB_pready)) begin
-				if(microop != 8'b0) begin
+				if(microop != 0) begin
 					microop_pc <= microop_pc + 1;
 					microop <= microop_prog[microop_pc];
 				end else begin
-					write_flag <= 0;
 					instruction <= 0;
 					microop_pc <= 1;
 					APB_paddr <= pc;
@@ -177,10 +177,13 @@ end
 				end
 			end
 			if(sys_load) begin
-				APB_paddr <= {29'b0,write_flag,2'b0};
+				APB_paddr <= 0;
 				APB_pdata <= pc;
+				if(APB_penable && APB_psel && APB_pready && write_flag) begin
+					pc <= systmp;
+				end
 				if(APB_penable && APB_psel && APB_pready && !write_flag) begin
-					pc <= odata;
+					systmp <= odata;
 				end
 			end
 			if(store_alu) regfile[wa] <= alu_out;

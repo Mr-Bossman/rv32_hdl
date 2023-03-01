@@ -57,7 +57,7 @@ module APB
 			uart_enable = penable;
 			pready = uart_ready;
 			prdata = uart_data;
-		end else if (paddr <= 'h400)begin
+		end else if (paddr <= 'hfff)begin
 			access_fault = 0;
 			uart_sel = 0;
 			uart_enable = 0;
