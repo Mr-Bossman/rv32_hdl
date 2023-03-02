@@ -32,6 +32,11 @@ module soc_top
 	wire system_ready;
 	wire system_perr;
 
+initial begin
+	$dumpfile("soc.vcd");
+	$dumpvars(0, soc_top);
+end
+
 	cpu 	    riscv_cpu(clk,APB_paddr,APB_pdata,APB_prdata,APB_psel,APB_penable,APB_pwrite,APB_pstb,APB_pready,APB_perr,rts,halted,odat,oldpc);
 	APB 	      apb_bus(clk,APB_paddr,APB_pdata,APB_prdata,APB_psel,APB_penable,APB_pwrite,APB_pstb,APB_pready,APB_perr,sram_sel,sram_enable,sram_data,sram_ready,sram_perr,uart_sel,uart_enable,uart_data,uart_ready,uart_perr,system_sel,system_enable,system_data,system_ready,system_perr);
 

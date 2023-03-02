@@ -13,7 +13,7 @@ halt:
 	la x6, .texts
 1:
 	lw x5, 0(x6)
-	sw x5, 0(x10)
+	sb x5, 0(x10)
 	addi x6,x6,1
 	bne x5,x8,1b
 	.word 0x00;

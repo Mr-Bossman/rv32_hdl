@@ -1,5 +1,3 @@
-fix broken instructions
 use apb to do inalligned accesses
 add exit instruction
-check apb against spec
 add exeptions

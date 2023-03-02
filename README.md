@@ -1,6 +1,6 @@
 # Super simple microcodedd RISCV32I cpu.
 
- - 6 or 7(mem) clocks cycles per instrution.
+ - 3(LUI/AUIPC/JAL), 4(ALU/BRANCH/JALR), 6(STORE/LOAD) clocks cycles per instrution.
  - No fence or CSR instructions.
  - No MMU.
  - Uses APB bus.
