@@ -119,9 +119,8 @@ _start:
 
 
 	TEST(simple)
-_theend:
-	j _theend
-	j _start
+	.word 0x00;
+
 
 # void uart_putchar(char c)
 uart_putchar:
