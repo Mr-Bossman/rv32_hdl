@@ -38,9 +38,9 @@ module cpu
 
 /* Microcode start */
 	reg[3:0] op_jmp;
-	reg [22:0] microop_prog[0:71];
-	reg [22:0] microop;
-	wire [6:0] microop_pc = microop[22:16];
+	reg [15:0] microop_prog[0:127];
+	reg [15:0] microop;
+	wire [6:0] microop_pc = microop[15:9];
 	reg [6:0] microop_addr;
 initial begin
 	$readmemh("microop.mem", microop_prog);
@@ -73,8 +73,8 @@ end
 	wire jal_flag = (load_insr)?microop_prog[op_jmp][10]:0;
 */
 	/* Microcode reads need to be synchronous */
-	wire lui_flag = (load_insr && op_jmp == (7));
-	wire jal_flag = (load_insr && op_jmp == (8));
+	wire lui_flag = (load_insr && op_jmp == (0 | 7));
+	wire jal_flag = (load_insr && op_jmp == (8 | 7));
 /* flags end */
 
 /* Instruction operands start */
@@ -155,13 +155,13 @@ end
 				op_jmp = 2;
 			end
 			7'b0?10111: begin //LUI/AUIPC
-				op_jmp = 7;
+				op_jmp = 0 | 7;
 			end
 			7'b0?10011: begin // ALU
 				op_jmp = 4;
 			end
 			7'b1101111: begin // JAL
-				op_jmp = 8;
+				op_jmp = 8 | 7;
 			end
 			7'b1100111: begin // JALR
 				op_jmp = 5;
@@ -181,10 +181,10 @@ end
 /* Microop PC start */
 	always @(*) begin
 		if(load_insr)
-			microop_addr = {op_jmp,3'b0};
+			microop_addr = {op_jmp[2:0], microop_pc[3:0]};
 		/* Don't interrupt if we are in the interrupt handler */
 		else if(microop_pc == 0 && interrupt && pc > 'h1000)
-			microop_addr = 3*8; // System
+			microop_addr = 3*16 + 2; // System
 		else
 			microop_addr = microop_pc;
 	end

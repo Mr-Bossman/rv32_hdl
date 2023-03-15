@@ -13,13 +13,6 @@ class Micro_ops(enum.IntEnum):
 	LOAD_PC = 0x40,
 	SYS_LOAD = 0x80,
 	ALU_STORE= 0x100,
-	LUI_FLAG = 0x200,
-	JAL_FLAG = 0x400,
-	RESERVED0 = 0x800
-	RESERVED1 = 0x1000
-	RESERVED2 = 0x2000
-	RESERVED3 = 0x4000
-	RESERVED4 = 0x8000
 
 
 LOADINS = [Micro_ops.APB_PSEL,
@@ -45,22 +38,26 @@ SYSTEM = [Micro_ops.SYS_LOAD,
 ALU = [Micro_ops.ALU_STORE,Micro_ops.NOP]
 JALR = [Micro_ops.LOAD_PC,Micro_ops.NOP]
 BRANCH = [Micro_ops.ALU_FLAGS | Micro_ops.LOAD_PC,Micro_ops.NOP]
-LUI = [Micro_ops.LUI_FLAG]
-JAL = [Micro_ops.JAL_FLAG]
 
 def gen_opcodes(index, microcode):
-	if(len(microcode) > 8):
+	if(len(microcode) > 16-len(LOADINS)):
 		print("Too many microcode instructions")
 		return
-	for i in range(8):
+	ofs = 1 if index == 0 else len(LOADINS)
+	for i in range(16):
 		if(i >= len(microcode)):
 			code = 0
 		else:
-			code = microcode[i] | (((i+1)*0x10000) + (index*0x80000))
+			#top 3 bits are the opcode index next 4 bits are the microcode index
+			#last 9 bits are the microcode
+			code = microcode[i] | (((i+ofs)*0x200) + (index*0x2000))
+			# end jump to start
 			if(i == len(microcode)-1):
-				code = microcode[i]
-		print("{:06x}".format(code))
-
+				code = 0
+		print("{:04x}".format(code))
+	if index == 0:
+		for _ in range(len(LOADINS)-1):
+			print("0"*4)
 def gen_microcode():
 	gen_opcodes(0, LOADINS)
 	gen_opcodes(1, STORE)
@@ -69,9 +66,11 @@ def gen_microcode():
 	gen_opcodes(4, ALU)
 	gen_opcodes(5, JALR)
 	gen_opcodes(6, BRANCH)
-	gen_opcodes(7, LUI)
-	gen_opcodes(8, JAL)
-
+	# pad out the rest of the microcode
+	# this allows for 7 opcodes
+	# the last opcode is a jump to the start
+	for _ in range(16-(len(LOADINS)-1)):
+		print("0"*4)
 	#for i in range(9):
 	#	print(i*8)
 
